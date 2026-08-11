@@ -21,10 +21,14 @@ const CONFIG = {
   fallLimitM: 14,          // meters below checkpoint that triggers a soft respawn
   levelHeightM: 260,       // total climbable height in meters
   worldHalfWidth: 480,     // level is this wide on each side of x=0
+  maxFallSpeed: 15,        // hard cap on the player's downward velocity (px per physics step)
+  playerFrictionAir: 0.026,// air resistance on the player — gives a natural, softer terminal fall speed
   difficulties: {
-    easy:   { gravity: 0.78, stiffness: 0.82, friction: 0.9,  restitution: 0.05 },
-    normal: { gravity: 1.0,  stiffness: 0.72, friction: 0.75, restitution: 0.08 },
-    hard:   { gravity: 1.18, stiffness: 0.62, friction: 0.55, restitution: 0.12 }
+    // Gravity, stiffness, friction and restitution are tuned to feel like a
+    // controllable, "heavy but fair" physics climber rather than a hard drop.
+    easy:   { gravity: 0.42, stiffness: 0.82, friction: 0.9,  restitution: 0.02 },
+    normal: { gravity: 0.52, stiffness: 0.72, friction: 0.75, restitution: 0.035 },
+    hard:   { gravity: 0.65, stiffness: 0.62, friction: 0.55, restitution: 0.06 }
   }
 };
 
@@ -319,13 +323,21 @@ function buildWorld() {
 
 function buildPlayer() {
   const sx = 0, sy = -30;
-  const pot = Bodies.trapezoid(sx, sy, 76, 56, 0.55, { friction: PHYS.friction * 0.9, restitution: 0.02, density: 0.006 });
-  const torso = Bodies.circle(sx, sy - 42, 22, { friction: 0.4, restitution: 0.02, density: 0.003 });
-  const head = Bodies.circle(sx, sy - 70, 14, { friction: 0.4, restitution: 0.02, density: 0.001 });
+  // Higher density = more mass = more stability: the pot resists being
+  // flung around by hammer impulses and settles quickly instead of
+  // bouncing or sliding after a hit. Restitution kept very low so the pot
+  // doesn't bounce off platforms it lands on.
+  const pot = Bodies.trapezoid(sx, sy, 76, 56, 0.55, { friction: PHYS.friction * 0.9, restitution: 0.01, density: 0.016 });
+  const torso = Bodies.circle(sx, sy - 42, 22, { friction: 0.4, restitution: 0.01, density: 0.007 });
+  const head = Bodies.circle(sx, sy - 70, 14, { friction: 0.4, restitution: 0.01, density: 0.002 });
 
   player = Body.create({
     parts: [pot, torso, head],
-    frictionAir: 0.012,
+    // frictionAir acts like air resistance: it grows with speed, so it
+    // naturally caps how fast the player can fall instead of letting
+    // gravity accelerate it indefinitely. Combined with the explicit
+    // maxFallSpeed clamp in the game loop, falling stays controllable.
+    frictionAir: CONFIG.playerFrictionAir,
     label: 'player'
   });
   Body.setPosition(player, { x: sx, y: sy }); // no-op, keeps intent explicit
@@ -552,6 +564,15 @@ function onFall(hardVoid) {
   Body.setVelocity(hammer, { x: 0, y: 0 });
   Body.setAngularVelocity(hammer, 0);
   Body.setAngle(hammer, 0);
+}
+
+// Hard safety cap on downward speed — on top of the higher frictionAir and
+// lower gravity, this guarantees the player can never free-fall out of
+// control, no matter how far the drop.
+function clampPlayerFallSpeed() {
+  if (player.velocity.y > CONFIG.maxFallSpeed) {
+    Body.setVelocity(player, { x: player.velocity.x, y: CONFIG.maxFallSpeed });
+  }
 }
 
 function checkFallLimit() {
@@ -881,6 +902,7 @@ function tick(now) {
     updateHammerControl(dt);
     updateKinematicPlatforms(now / 1000);
     Engine.update(engine, dt * 1000);
+    clampPlayerFallSpeed();
     updateCamera(dt);
     updateDust(dt);
     checkFallLimit();
