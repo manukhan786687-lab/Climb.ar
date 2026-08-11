@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>HAMMER CLIMB</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Game canvas -->
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- HUD (visible during gameplay) -->
+  <div id="hud" class="hidden">
+    <div class="hud-top">
+      <div class="height-box">
+        <span class="height-label">HEIGHT</span>
+        <span id="heightValue">0m</span>
+      </div>
+      <div class="height-box best">
+        <span class="height-label">BEST</span>
+        <span id="bestHeightValue">0m</span>
+      </div>
+      <button id="pauseBtn" class="icon-btn" aria-label="Pause">❚❚</button>
+    </div>
+    <div id="toast" class="toast hidden"></div>
+  </div>
+
+  <!-- Main Menu -->
+  <div id="mainMenu" class="screen">
+    <div class="menu-panel">
+      <h1 class="title">HAMMER<span>CLIMB</span></h1>
+      <p class="subtitle">One pot. One hammer. One long way up.</p>
+      <div class="best-display">
+        <span class="height-label">BEST HEIGHT</span>
+        <span id="menuBestHeight">0m</span>
+      </div>
+      <button id="playBtn" class="btn btn-primary">PLAY</button>
+      <button id="howToBtn" class="btn">HOW TO PLAY</button>
+      <button id="settingsBtn" class="btn">SETTINGS</button>
+      <label class="hardmode-toggle">
+        <input type="checkbox" id="hardModeCheck" />
+        <span>Hard Mode (no checkpoints)</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- How To Play -->
+  <div id="howToScreen" class="screen hidden">
+    <div class="menu-panel">
+      <h2 class="panel-title">HOW TO PLAY</h2>
+      <ul class="howto-list">
+        <li><strong>Drag</strong> your finger (or mouse) around your character to aim the hammer.</li>
+        <li><strong>Press and hold</strong> to actively swing the hammer toward your finger.</li>
+        <li>The hammer <strong>pushes against</strong> platforms and walls &mdash; use it to pull and lever your pot upward.</li>
+        <li>There is <strong>no walking</strong>. Momentum and gravity are your only friends.</li>
+        <li><strong>Release</strong> to let the hammer swing freely, like a pendulum.</li>
+        <li>Falling can send you back down &mdash; but checkpoints will save your progress (unless Hard Mode is on).</li>
+        <li>Reach the <strong>tower at the very top</strong> to win.</li>
+      </ul>
+      <button class="btn btn-primary back-btn">BACK</button>
+    </div>
+  </div>
+
+  <!-- Settings -->
+  <div id="settingsScreen" class="screen hidden">
+    <div class="menu-panel">
+      <h2 class="panel-title">SETTINGS</h2>
+
+      <div class="setting-row">
+        <span>Sound</span>
+        <label class="switch"><input type="checkbox" id="soundToggle" checked><span class="slider"></span></label>
+      </div>
+      <div class="setting-row">
+        <span>Music</span>
+        <label class="switch"><input type="checkbox" id="musicToggle" checked><span class="slider"></span></label>
+      </div>
+      <div class="setting-row">
+        <span>Vibration</span>
+        <label class="switch"><input type="checkbox" id="vibrationToggle" checked><span class="slider"></span></label>
+      </div>
+      <div class="setting-row">
+        <span>Physics Difficulty</span>
+        <select id="difficultySelect">
+          <option value="easy">Easy</option>
+          <option value="normal" selected>Normal</option>
+          <option value="hard">Hard</option>
+        </select>
+      </div>
+      <div class="setting-row column">
+        <span>Control Sensitivity</span>
+        <input type="range" id="sensitivitySlider" min="0.4" max="1.8" step="0.05" value="1" />
+      </div>
+
+      <button class="btn btn-primary back-btn">BACK</button>
+    </div>
+  </div>
+
+  <!-- Pause Menu -->
+  <div id="pauseMenu" class="screen hidden">
+    <div class="menu-panel">
+      <h2 class="panel-title">PAUSED</h2>
+      <button id="resumeBtn" class="btn btn-primary">RESUME</button>
+      <button id="restartBtn" class="btn">RESTART</button>
+      <button id="pauseSettingsBtn" class="btn">SETTINGS</button>
+      <button id="mainMenuBtn" class="btn">MAIN MENU</button>
+    </div>
+  </div>
+
+  <!-- Victory Screen -->
+  <div id="victoryScreen" class="screen hidden">
+    <div class="menu-panel victory-panel">
+      <h2 class="panel-title victory-title">YOU MADE IT!</h2>
+      <div class="victory-stats">
+        <div><span class="height-label">FINAL HEIGHT</span><span id="finalHeight">0m</span></div>
+        <div><span class="height-label">TIME</span><span id="finalTime">0:00</span></div>
+        <div><span class="height-label">BEST HEIGHT</span><span id="victoryBestHeight">0m</span></div>
+      </div>
+      <button id="playAgainBtn" class="btn btn-primary">PLAY AGAIN</button>
+      <button id="victoryMenuBtn" class="btn">MAIN MENU</button>
+    </div>
+  </div>
+
+  <!-- Matter.js physics engine (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
